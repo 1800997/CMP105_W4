@@ -1,17 +1,49 @@
 #include "Level.h"
 
+
 Level::Level(sf::RenderWindow* hwnd, Input* in)
 {
 	window = hwnd;
 	input = in;
 
 	// initialise game objects
-	texture.loadFromFile("gfx/Mushroom.png");
 
-	testSprite.setTexture(&texture);
-	testSprite.setSize(sf::Vector2f(100, 100));
-	testSprite.setPosition(100, 100);
+	playerObject.setInput(input);
+	cursorIcon.setInput(input);
+	backround.setInput(input);
 
+	texture.loadFromFile("gfx/Mamma.png");
+	playerObject.setTexture(&texture);
+
+	playerObject.setSize(sf::Vector2f(250, 250));
+	playerObject.setPosition(100, 100);
+	playerObject.setVelocity(500,500);
+
+	
+
+	texture2.loadFromFile("gfx/Goomba.png");
+	enemyObject.setTexture(&texture2);
+
+	enemyObject.setSize(sf::Vector2f(80, 80));
+	enemyObject.setPosition(0, 0);
+	enemyObject.setVelocity(500, 500);
+
+	
+	window->setMouseCursorVisible(false);
+
+	cursorTexture.loadFromFile("gfx/Icon.png");
+	cursorIcon.setTexture(&cursorTexture);
+	cursorIcon.setSize(sf::Vector2f(40,40));
+
+	backroundTexture.loadFromFile("gfx/Level1_1.png");
+	backround.setTexture(&backroundTexture);
+	backround.setSize(sf::Vector2f(11038, 675));
+
+	view = window->getView();
+	
+
+	
+	
 }
 
 Level::~Level()
@@ -27,12 +59,20 @@ void Level::handleInput(float dt)
 	{
 		window->close();
 	}
+	
+	playerObject.handleInput(dt);
 
 }
 
 // Update game objects
 void Level::update(float dt)
 {
+	windowX= window->getSize().x;
+	windowY= window->getSize().y;
+	cursorIcon.changeCursor();
+	enemyObject.moveEnemy(dt, windowX, windowY);
+	int moveXview = backround.moveView(view.getCenter().x, view.getSize().x);
+	view.move(moveXview,0);
 	
 }
 
@@ -41,7 +81,11 @@ void Level::render()
 {
 	beginDraw();
 
-	window->draw(testSprite);
+	window->setView(view);
+	window->draw(backround);
+	window->draw(playerObject);
+	window->draw(enemyObject);
+	window->draw(cursorIcon);
 
 	endDraw();
 }
@@ -49,7 +93,7 @@ void Level::render()
 // clear back buffer
 void Level::beginDraw()
 {
-	window->clear(sf::Color(100, 149, 237));
+	window->clear(sf::Color::White);
 }
 
 // Ends rendering to the back buffer, and swaps buffer to the screen.
